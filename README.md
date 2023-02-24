@@ -16,7 +16,7 @@ For #2, I chose approach #3 with a queue to serve the guests.
 # Problem 1 - Cupcakes
 ## Proof of Correctness:
 ### Safety Property  
-#### Mutual Exclusion  
+#### Mutual Exclusion/No Contention
 In the Cupcake problem, I designed my solution such that only 1 guest (thread) may enter the maze at a time.  
 My threads were not computing on objects - instead, they were all running on seperate instances of a function.  
 So, without the use of object private variables, how do we keep track of thread ID's, and how do we keep track of a variable to show whether or not a thread is in the maze?  
@@ -47,7 +47,7 @@ Thus, the leader just counts until they count to the number of guests they start
 # Problem 1 - Cupcakes
 ## Proof of Correctness:
 ### Safety Property  
-#### Mutual Exclusion/No Conten
+#### Mutual Exclusion
 In the Vase problem, I chose approach #3 which makes use of a Queue and I did not have to use a boolean like I did last time in the case of `inLab`.  
 Instead, the queue acts as a flag itself (if it is empty/only has 1 element).  
   
@@ -62,7 +62,7 @@ So by the use of a queue, only 1 value in `invited` is ever true at a time thus 
 
     
 ### Liveness Property  
-#### No Infinite Loop  
+#### No Infinite Loop/No Contention Issues
 I actually ran into many infinite loops while producing this code, but it was simply logic issues.  
 It is a little difficult to manage all of the flags when both the Main function and the thread functions both operate on them, but after some bug-fixing and troubleshooting, I fixed all my logic.  
 The simple no-loop logic is that one person is designated the leader (the thread with ID 0), and he counts +1 every time he sees a cupcake on the plate.  
@@ -76,7 +76,7 @@ Thus, the leader just counts until they count to the number of guests they start
 # Problem 2 - Vase
 ## Proof of Correctness:
 ### Safety Property  
-#### Mutual Exclusion/No Contention
+#### Mutual Exclusion
 In the Vase problem, I chose approach #3 which makes use of a Queue and I did not have to use a boolean like I did last time in the case of `inLab`.  
 Instead, the queue acts as a flag itself (if it is empty/only has 1 element).  
   
@@ -91,16 +91,13 @@ So by the use of a queue, only 1 value in `invited` is ever true at a time thus 
 
     
 ### Liveness Property  
-#### No Infinite Loop  
-I actually ran into many infinite loops while producing this code, but it was simply logic issues.  
-It is a little difficult to manage all of the flags when both the Main function and the thread functions both operate on them, but after some bug-fixing and troubleshooting, I fixed all my logic.  
-The simple no-loop logic is that one person is designated the leader (the thread with ID 0), and he counts +1 every time he sees a cupcake on the plate.  
-All the others follow a simple rule: if the plate is empty, and it's their first time seeing an empty plate, they must eat a cupcake (if they want) and, more importantly, leave the plate with a cupcake on it.    
-If there is already a cupcake on the plate, do nothing.  
-If there is no cupcake but they have already eaten a cupcake, do nothing.  
-  
-This strategy allows the leader to count the guests that have visited. Each time a guest visits (when the plate is empty), they leave a cupcake, and that acts as a flag to the leader.  
-Thus, the leader just counts until they count to the number of guests they started with.
+#### No Infinite Loop/No Contention Issues
+This problem was a little more difficult as almost all the work and organization was being done by the threads. The driver function `startVase` literally only starts the threads and then checks if the `everyoneSeen` flag has been marked `true`.  
+Thus, almost no work is done by the driver and the entire program is within the communication of the threads by way of the global queue and array.
 
+The queue length checks and the boolean checks ensure that only 1 thread is running, and the thread even waits to make sure there is another thread in line before leaving the room.  
+This prevents a deadness in the case that the first thread leaves, tries to let the next thread in, but there is no thread. Then, when the second thread finally comes along, there is no one to let them know they can come in. So, by ensuring there is someone waiting in line, we avoid deadness.
+
+Thanks!
   
 Q.E.D.
